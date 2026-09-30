@@ -1,0 +1,184 @@
+const mysql = require('mysql2/promise');
+
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'Soham123',
+    waitForConnections: true,
+    connectionLimit: 10
+});
+
+const cityData = {
+    'Mumbai': {
+        venues: [
+            'Wankhede Stadium Turf, Churchgate', 'Azad Maidan Pitch No. 4, CST', 'Bandra Kickoff Arena, Bandra West',
+            'Andheri Sports Complex (SPG)', 'Shivaji Park Gymkhana, Dadar', 'Cross Maidan, Marine Lines',
+            'Parel United Turf Grounds', 'Oval Maidan South Pavilion', 'Chembur Gymkhana Turf Club',
+            'Goregaon Sports Club Arena', 'Juhu Vile Parle Gymkhana (JVPGC)', 'Borivali National Park Turf Arena'
+        ],
+        clubs: ['MCA Affiliated Club', 'Mumbai City Youth Sports', 'Bandra Strikers Association', 'Suburban Sports League']
+    },
+    'Pune': {
+        venues: [
+            'Balewadi Sports Stadium Complex', 'Viman Nagar Arena Turf', 'Deccan Gymkhana Sports Ground',
+            'FC Road Turf Hub, Shivaji Nagar', 'Kothrud Champions Arena', 'Hadapsar Magarpatta Turf Club',
+            'Kalyani Nagar Futsal Arena', 'Aundh Smashers Badminton Court', 'Pimpri-Chinchwad Municipal Turf'
+        ],
+        clubs: ['Poona District Sports Association', 'Shivaji Maratha Sports Club', 'Balewadi Academy', 'Deccan Warriors Hub']
+    },
+    'Thane': {
+        venues: [
+            'Dadoji Kondadev Stadium, Khopat', 'Upvan Lake Turf Arena', 'Hiranandani Estate Turf Club, Patlipada',
+            'Ghodbunder Turf Park', 'Majiwada Golden Turf Hub', 'Naupada Gymkhana Grounds',
+            'Kopri Sports Complex', 'Vartak Nagar Sports Turf', 'Balkum Super Turf Arena'
+        ],
+        clubs: ['Thane District Olympic Council', 'Dadoji Kondadev Academy', 'Upvan Knights Club', 'Ghodbunder Sports Trust']
+    },
+    'Nagpur': {
+        venues: ['Reshimbagh Ground', 'Mankapur Indoor Stadium', 'Dharampeth Turf Club', 'Civil Lines Sports Pavilion'],
+        clubs: ['Vidarbha Sports Board', 'Nagpur District Association', 'Orange City Spikers']
+    },
+    'Nashik': {
+        venues: ['Mahatma Nagar Turf Arena', 'Golf Club Sports Ground', 'Indira Nagar Sports Arena', 'Panchavati District Complex'],
+        clubs: ['Nashik District Sports Office', 'Godavari Sports Club', 'Kumbh City Warriors']
+    },
+    'Kolhapur': {
+        venues: ['Khasbag Arena', 'Rajarampuri Ground', 'Tarabai Park Turf Club', 'Shahu Stadium Pavilion'],
+        clubs: ['Kolhapur Sports Council', 'Shahu Chhatrapati Trust', 'Karveer Sports Guild']
+    },
+    'Chhatrapati Sambhajinagar': {
+        venues: ['Dr. Babasaheb Ambedkar Sports Stadium', 'Prozone Sports Hub', 'Cidco Turf Arena', 'Garkheda Sports Complex'],
+        clubs: ['Marathwada Olympic Guild', 'Sambhajinagar Sports Foundation']
+    }
+};
+
+const sportsData = {
+    'Cricket': {
+        formats: ['T10 Leather Ball', 'T20 Open Trophy', 'Box Cricket Night Cup', 'Overarm Tennis Knockout'],
+        prefixes: ['Super League', 'Premier Cup', 'Championship', 'Golden Trophy', 'Night Floodlight Cup']
+    },
+    'Football': {
+        formats: ['5v5 Turf Knockout', '7v7 Futsal Championship', '11v11 League Cup', 'Golden Goal Cup'],
+        prefixes: ['Champions Futsal', 'Super Cup', 'Pro League', 'Turf Masters']
+    },
+    'Kabaddi': {
+        formats: ['Pro-Style Mat 7v7', 'Circle Kabaddi Open', 'State Invitational'],
+        prefixes: ['Mat Masters Trophy', 'Yoddha Clash', 'District Cup']
+    },
+    'Badminton': {
+        formats: ['Men Singles Open', 'Men Doubles Premier', 'Mixed Doubles Championship'],
+        prefixes: ['Shuttle Smashers Open', 'Smash Masters', 'Grand Slam Cup']
+    },
+    'Volleyball': {
+        formats: ['6v6 Rotation Knockout', 'Super Spikers League', 'Beach 2v2 Open'],
+        prefixes: ['Spikers Trophy', 'Volley Slam', 'Blockers Invitational']
+    },
+    'Basketball': {
+        formats: ['3x3 Half-Court Streetball', '5v5 Full-Court Classic', 'Hoop Masters League'],
+        prefixes: ['Hoop Fest', 'Streetball Rumble', 'Ballers Cup']
+    }
+};
+
+async function setup() {
+    console.log('🔄 Initializing database structure...');
+    const conn = await pool.getConnection();
+
+    try {
+        await conn.query(`CREATE DATABASE IF NOT EXISTS playsphere_db;`);
+        await conn.query(`USE playsphere_db;`);
+
+        // 1. Tournaments Table
+        await conn.query(`
+            CREATE TABLE IF NOT EXISTS tournaments (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                sport VARCHAR(50) NOT NULL,
+                city VARCHAR(100) NOT NULL,
+                venue VARCHAR(255) NOT NULL,
+                start_date DATE NOT NULL,
+                end_date DATE NOT NULL,
+                format_type VARCHAR(100) DEFAULT 'Knockout',
+                entry_fee DECIMAL(10, 2) DEFAULT 0.00,
+                prize_pool DECIMAL(10, 2) DEFAULT 0.00,
+                max_teams INT DEFAULT 32,
+                organizer_name VARCHAR(150) NOT NULL,
+                organizer_contact VARCHAR(30) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // 2. Team Registrations Table
+        await conn.query(`
+            CREATE TABLE IF NOT EXISTS team_registrations (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                tournament_id INT NOT NULL,
+                team_name VARCHAR(150) NOT NULL,
+                captain_name VARCHAR(120) NOT NULL,
+                captain_email VARCHAR(150) NOT NULL,
+                captain_contact VARCHAR(30) NOT NULL,
+                vice_captain_name VARCHAR(120),
+                player_roster TEXT NOT NULL,
+                kit_jersey_color VARCHAR(60),
+                city_origin VARCHAR(100),
+                registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (tournament_id) REFERENCES tournaments(id) ON DELETE CASCADE,
+                UNIQUE KEY unique_team_captain (tournament_id, captain_email)
+            );
+        `);
+
+        // Clear existing records
+        await conn.query(`DELETE FROM team_registrations;`);
+        await conn.query(`DELETE FROM tournaments;`);
+
+        console.log('⚡ Populating tournaments across Maharashtra...');
+        const batch = [];
+
+        for (const [cityName, cityInfo] of Object.entries(cityData)) {
+            const iterations = (cityName === 'Mumbai' || cityName === 'Pune' || cityName === 'Thane') ? 22 : 14;
+
+            for (const [sportName, sportInfo] of Object.entries(sportsData)) {
+                for (let i = 1; i <= iterations; i++) {
+                    const venue = cityInfo.venues[Math.floor(Math.random() * cityInfo.venues.length)];
+                    const format = sportInfo.formats[Math.floor(Math.random() * sportInfo.formats.length)];
+                    const prefix = sportInfo.prefixes[Math.floor(Math.random() * sportInfo.prefixes.length)];
+                    const club = cityInfo.clubs[Math.floor(Math.random() * cityInfo.clubs.length)];
+
+                    const tournamentName = `${cityName} ${prefix} ${sportName} Series ${i} (${format})`;
+
+                    const startOffset = Math.floor(Math.random() * 80) + 1;
+                    const duration = Math.floor(Math.random() * 3) + 2;
+                    const startDate = new Date(Date.now() + startOffset * 86400000).toISOString().split('T')[0];
+                    const endDate = new Date(Date.now() + (startOffset + duration) * 86400000).toISOString().split('T')[0];
+
+                    const fee = (Math.floor(Math.random() * 25) + 5) * 100;
+                    const prize = fee * (Math.floor(Math.random() * 8) + 10);
+                    const maxTeams = [16, 24, 32, 64][Math.floor(Math.random() * 4)];
+                    const contact = `+91 98${Math.floor(10000000 + Math.random() * 90000000)}`;
+
+                    batch.push([
+                        tournamentName, sportName, cityName, venue, startDate, endDate,
+                        format, fee, prize, maxTeams, club, contact
+                    ]);
+                }
+            }
+        }
+
+        const insertSQL = `
+            INSERT INTO tournaments (
+                name, sport, city, venue, start_date, end_date, 
+                format_type, entry_fee, prize_pool, max_teams, 
+                organizer_name, organizer_contact
+            ) VALUES ?
+        `;
+
+        await conn.query(insertSQL, [batch]);
+        console.log(`✅ Success! Created all tables and inserted ${batch.length} tournaments.`);
+    } catch (err) {
+        console.error('❌ Setup Error:', err.message);
+    } finally {
+        conn.release();
+        process.exit();
+    }
+}
+
+setup();

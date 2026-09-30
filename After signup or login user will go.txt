@@ -1,0 +1,379 @@
+After signup or login user will go to home page. Give me an html code for home and include following things:
+1.Playshphere logo and name.
+2.Option for user to select city(include all major cities of Maharashtra).
+3.Option for user to select sport(include cricket,volleyball,football, kabaddi, badminton)
+4.According to user selection of sport show the tournaments in which user can register in it (show according to the selection of sport).
+5.In register include following things according to the each sport:
+FOOTBALL TOURNAMENT ORGANIZATION FORM
+
+1. Tournament Details
+
+Tournament Name: __________________________
+
+Organizer Name: __________________________
+
+Organizer Contact Number: __________________________
+
+Email ID: __________________________
+
+Tournament Location/Venue: __________________________
+
+Tournament Start Date: __________________________
+
+Tournament End Date: __________________________
+
+2. Tournament Format
+
+Tournament Type:
+☐ Knockout
+☐ League
+☐ League + Knockout
+
+Number of Teams Allowed: __________________________
+
+Number of Players per Team: __________________________
+
+Match Duration: __________________________
+
+3. Registration Details
+
+Team Registration Fee: ₹__________________________
+
+Registration Start Date: __________________________
+
+Registration Last Date: __________________________
+
+Maximum Teams: __________________________
+
+4. Tournament Facilities
+
+☐ Ground
+☐ Referee
+☐ First Aid
+☐ Drinking Water
+☐ Changing Room
+
+Prize Money: ₹__________________________
+
+Other Prizes: __________________________
+
+5. Rules
+
+Tournament Rules: ________________________________
+
+---
+
+6. Confirmation
+
+☐ I agree to follow the tournament rules and regulations.
+
+CREATE TOURNAMENT
+CANCEL
+
+
+
+CRICKET TOURNAMENT ORGANIZATION FORM
+
+1. Tournament Details
+
+Tournament Name: __________________________
+
+Organizer Name: __________________________
+
+Organizer Contact Number: __________________________
+
+Email ID: __________________________
+
+Tournament Location/Venue: __________________________
+
+Tournament Start Date: __________________________
+
+Tournament End Date: __________________________
+
+2. Tournament Format
+
+Tournament Type:
+☐ Knockout
+☐ League
+☐ League + Knockout
+
+Number of Teams Allowed: __________________________
+
+Players per Team: __________________________
+
+Match Format:
+☐ T10
+☐ T20
+☐ Other: __________________
+
+Number of Overs: __________________________
+
+3. Registration Details
+
+Team Registration Fee: ₹__________________________
+
+Registration Start Date: __________________________
+
+Registration Last Date: __________________________
+
+Maximum Teams: __________________________
+
+4. Facilities & Equipment
+
+☐ Cricket Ground
+☐ Umpires
+☐ Scorer
+☐ Cricket Ball
+☐ Stumps
+☐ First Aid
+☐ Drinking Water
+
+Prize Money: ₹__________________________
+
+Other Prizes: __________________________
+
+5. Rules
+
+Tournament Rules: ________________________________
+
+---
+
+6. Confirmation
+
+☐ I agree to follow the tournament rules and regulations.
+
+CREATE TOURNAMENT
+CANCEL
+
+
+KABADDI TOURNAMENT ORGANIZATION FORM
+
+1. Tournament Details
+
+Tournament Name: __________________________
+
+Organizer Name: __________________________
+
+Organizer Contact Number: __________________________
+
+Email ID: __________________________
+
+Tournament Location/Venue: __________________________
+
+Tournament Start Date: __________________________
+
+Tournament End Date: __________________________
+
+2. Tournament Format
+
+Tournament Type:
+☐ Knockout
+☐ League
+☐ League + Knockout
+
+Number of Teams Allowed: __________________________
+
+Players per Team: __________________________
+
+Match Duration: __________________________
+
+3. Registration Details
+
+Team Registration Fee: ₹__________________________
+
+Registration Start Date: __________________________
+
+Registration Last Date: __________________________
+
+Maximum Teams: __________________________
+
+4. Facilities
+
+☐ Kabaddi Court
+☐ Referee
+☐ Scorer
+☐ First Aid
+☐ Drinking Water
+☐ Changing Room
+
+Prize Money: ₹__________________________
+
+Other Prizes: __________________________
+
+5. Rules
+
+Tournament Rules: ________________________________
+
+---
+
+6. Confirmation
+
+☐ I agree to follow the tournament rules and regulations.
+
+CREATE TOURNAMENT
+CANCEL
+
+
+BADMINTON TOURNAMENT ORGANIZATION FORM
+
+1. Tournament Details
+
+Tournament Name: __________________________
+
+Organizer Name: __________________________
+
+Organizer Contact Number: __________________________
+
+Email ID: __________________________
+
+Tournament Location/Venue: __________________________
+
+Tournament Start Date: __________________________
+
+Tournament End Date: __________________________
+
+2. Tournament Format
+
+Tournament Type:
+☐ Knockout
+☐ League
+☐ League + Knockout
+
+Match Type:
+☐ Singles
+☐ Doubles
+☐ Mixed Doubles
+
+Number of Participants/Teams Allowed: __________________________
+
+Match Format:
+☐ Best of 3 Games
+☐ Other: __________________________
+
+3. Registration Details
+
+Registration Fee: ₹__________________________
+
+Registration Start Date: __________________________
+
+Registration Last Date: __________________________
+
+Maximum Participants/Teams: __________________________
+
+4. Facilities & Equipment
+
+☐ Badminton Court
+☐ Referee/Umpire
+☐ Scorekeeper
+☐ Badminton Nets
+☐ Shuttlecocks
+☐ First Aid
+☐ Drinking Water
+☐ Changing Room
+
+Prize Money: ₹__________________________
+
+Other Prizes: __________________________
+
+5. Rules
+
+Tournament Rules: ______________
+after registering user cannot register again in that particular registered tournament.
+6.if the team is in short of players show them the option of recruitment while registering as team which will direct it to solo pool page for recruitement.After recruiting that player the player's name should be cut from the solo pool page
+
+
+
+
+
+
+
+
+const express = require('express');
+const mysql = require('mysql2');
+const bcrypt = require('bcrypt');
+const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Serve static frontend files from this same folder
+app.use(express.static(__dirname));
+
+// Configure MySQL Database Connection Pool
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',           // Your MySQL username
+    password: 'Soham123',   // Your MySQL password
+    database: 'playsphere_db',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// Test database connection
+pool.getConnection((err, connection) => {
+    if (err) {
+        console.error('❌ Database Connection Failed!', err);
+    } else {
+        console.log('✅ Connected to MySQL database successfully!');
+        connection.release();
+    }
+});
+
+// Handle Signup / Register
+app.post('/register', async (req, res) => {
+    const { fullname, email, password } = req.body;
+    if (!fullname || !email || !password) {
+        return res.status(400).json({ success: false, message: 'All fields are required.' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const query = 'INSERT INTO users (fullname, email, password) VALUES (?, ?, ?)';
+
+        pool.execute(query, [fullname, email, hashedPassword], (err, results) => {
+            if (err) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(400).json({ success: false, message: 'Email is already registered.' });
+                }
+                return res.status(500).json({ success: false, message: 'Database error.' });
+            }
+            return res.status(200).json({ success: true, message: 'Account created successfully!' });
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+});
+
+// Handle Login
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: 'Please fill in all fields.' });
+    }
+
+    const query = 'SELECT * FROM users WHERE email = ?';
+    pool.execute(query, [email], async (err, results) => {
+        if (err || results.length === 0) {
+            return res.status(400).json({ success: false, message: 'Invalid email or password.' });
+        }
+
+        const user = results[0];
+        const match = await bcrypt.compare(password, user.password);
+        
+        if (match) {
+            return res.status(200).json({ success: true, message: 'Login successful!', name: user.fullname });
+        } else {
+            return res.status(400).json({ success: false, message: 'Invalid email or password.' });
+        }
+    });
+});
+
+// Start Server
+app.listen(PORT, () => {
+    console.log(`🚀 Server is running live at http://localhost:${PORT}`);
+});

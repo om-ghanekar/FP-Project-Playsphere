@@ -1,0 +1,38 @@
+USE playsphere_db;
+
+-- (Login / Users)
+SELECT * FROM users;
+
+-- (Team Registration)
+SELECT id, tournament_id, team_name, captain_name, captain_email, captain_contact, registered_at 
+FROM team_registrations 
+ORDER BY id DESC;
+
+-- (Solo Pool Registration)
+SELECT id, player_name, sport, preferred_position, city, contact_number, experience_level, created_at 
+FROM solo_pool 
+ORDER BY id DESC;
+
+-- (Latest Solo Pool Registration)
+SELECT * FROM solo_pool 
+ORDER BY id DESC 
+LIMIT 1;
+
+-- (Solo Pool)
+SELECT * FROM solo_pool;
+
+-- (Tournament Registration / Tournament Details)
+SELECT id, name, sport, city, venue, entry_fee, prize_pool, organizer_name, created_at 
+FROM tournaments 
+ORDER BY id DESC 
+LIMIT 10;
+
+
+cd /d "D:\OM GHANEKAR\FP\frontend"
+
+npm install express mysql2 bcrypt cors dotenv
+
+node server.js
+
+
+http://localhost:3000/login.html
