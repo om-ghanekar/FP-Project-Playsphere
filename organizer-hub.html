@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlaySphere — Organizer Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #07090e;
+            --surface-glass: rgba(18, 24, 38, 0.75);
+            --surface-card: rgba(23, 31, 51, 0.6);
+            --modal-surface: #0f1626;
+            --primary-glow: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --text-title: #f8fafc;
+            --text-body: #94a3b8;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(6, 182, 212, 0.5);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.08) 0px, transparent 60%);
+            color: var(--text-title);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Glass Header */
+        header {
+            padding: 1.1rem 3.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(7, 9, 14, 0.85);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border-glass);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-symbol {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--primary-glow));
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: var(--text-body);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: #fff;
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent-cyan);
+            border-radius: 2px;
+        }
+
+        .main-container {
+            max-width: 1350px;
+            margin: 2.5rem auto;
+            padding: 0 2rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(23, 31, 51, 0.7), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 2.2rem 3rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .hero-title {
+            font-size: 2.1rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-subtitle {
+            color: var(--text-body);
+            font-size: 0.95rem;
+            max-width: 650px;
+        }
+
+        .btn-action {
+            padding: 0.85rem 1.8rem;
+            background: linear-gradient(135deg, var(--primary-glow), var(--accent-cyan));
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.35);
+            transition: transform 0.2s, filter 0.2s;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* Stats & Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 0.8rem 1.2rem;
+            background: rgba(6, 182, 212, 0.08);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            border-radius: 12px;
+        }
+
+        /* Tournaments List */
+        .tournaments-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .tournament-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            padding: 1.8rem;
+            backdrop-filter: blur(12px);
+            transition: border-color 0.25s ease;
+        }
+
+        .tournament-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .tournament-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tournament-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 0.4rem;
+        }
+
+        .badge-sport {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 0.35rem 0.75rem;
+            border-radius: 30px;
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            text-transform: uppercase;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 1.2rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+        }
+
+        .info-item {
+            font-size: 0.88rem;
+            color: var(--text-body);
+        }
+
+        .info-item strong {
+            display: block;
+            color: #f1f5f9;
+            font-size: 0.95rem;
+            margin-top: 2px;
+        }
+
+        /* Progress Bar */
+        .progress-box {
+            margin: 1rem 0;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: var(--text-body);
+            margin-bottom: 6px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--primary-glow));
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        /* Teams Accordion Box */
+        .teams-toggle-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-glass);
+            color: var(--accent-cyan);
+            padding: 0.7rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .teams-toggle-btn:hover {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: var(--accent-cyan);
+        }
+
+        .teams-section {
+            margin-top: 1.2rem;
+            display: none;
+            padding-top: 1.2rem;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .teams-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            margin-top: 0.8rem;
+        }
+
+        .teams-table th, .teams-table td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .teams-table th {
+            color: var(--text-body);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .teams-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .roster-chip-box {
+            font-size: 0.8rem;
+            color: var(--text-body);
+            max-width: 320px;
+            line-height: 1.4;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(3, 7, 18, 0.88);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1.5rem;
+        }
+
+        .modal-card {
+            background: var(--modal-surface);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2.2rem;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1.5rem; right: 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-body);
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 0.8rem;
+        }
+
+        .form-group label {
+            font-size: 0.82rem;
+            color: var(--text-body);
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select {
+            padding: 0.8rem 1rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+            font-size: 0.92rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .toast-box {
+            position: fixed;
+            bottom: 2rem; right: 2rem;
+            background: #1e293b;
+            border-left: 4px solid var(--accent-cyan);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            color: #fff;
+            display: none;
+            z-index: 9999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 1rem 1.5rem; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="home.html" class="logo-box">
+            <div class="logo-symbol">⚡</div>
+            <span class="logo-text">PLAYSPHERE</span>
+        </a>
+        <div class="nav-links">
+            <a href="home.html">Tournaments</a>
+            <a href="solo-pool.html">Solo Pool</a>
+            <a href="organizer-hub.html" class="active">Organizer Hub</a>
+            <a href="login.html" onclick="localStorage.clear()">Logout</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+
+        <!-- Hero Section -->
+        <div class="hero-banner">
+            <div>
+                <h1 class="hero-title">Tournament Management Console</h1>
+                <p class="hero-subtitle">Review all your hosted tournaments and inspect registered squads, captains, contacts, and player rosters synced live with MySQL.</p>
+            </div>
+            <button class="btn-action" onclick="openHostModal()">+ Host New Tournament</button>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="section-header">
+            <span id="tournamentCountText" style="font-weight: 700; color: var(--accent-cyan);">⚡ Querying Hosted Tournaments & Registered Teams...</span>
+            <button class="btn-action" style="padding: 0.4rem 1rem; font-size: 0.8rem;" onclick="fetchHostedTournaments()">↻ Refresh</button>
+        </div>
+
+        <!-- Tournaments & Nested Teams List -->
+        <div class="tournaments-container" id="tournamentsContainer">
+            <!-- Dynamically populated from backend -->
+        </div>
+
+    </div>
+
+    <!-- Host Tournament Modal -->
+    <div class="modal-overlay" id="hostModal">
+        <div class="modal-card">
+            <button class="close-btn" onclick="closeHostModal()">&times;</button>
+            <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.3rem;">Host New Tournament</h3>
+            <p style="color: var(--text-body); font-size: 0.85rem; margin-bottom: 1.2rem;">This tournament will immediately become visible to players on `home.html`.</p>
+
+            <form id="hostForm" onsubmit="submitHostTournament(event)">
+                <div class="form-group">
+                    <label>Tournament Title *</label>
+                    <input type="text" id="tName" placeholder="e.g. Maharashtra Open Volleyball Championship 2026" required>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Sport *</label>
+                        <select id="tSport" required>
+                            <option value="Volleyball">Volleyball</option>
+                            <option value="Cricket">Cricket</option>
+                            <option value="Football">Football</option>
+                            <option value="Badminton">Badminton</option>
+                            <option value="Kabaddi">Kabaddi</option>
+                            <option value="Basketball">Basketball</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>City Hub *</label>
+                        <select id="tCity" required>
+                            <option value="Thane">Thane</option>
+                            <option value="Mumbai">Mumbai</option>
+                            <option value="Pune">Pune</option>
+                            <option value="Nagpur">Nagpur</option>
+                            <option value="Nashik">Nashik</option>
+                            <option value="Kolhapur">Kolhapur</option>
+                            <option value="Chhatrapati Sambhajinagar">Chhatrapati Sambhajinagar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Venue Grounds & Address *</label>
+                    <input type="text" id="tVenue" placeholder="e.g. Dadoji Kondadev Stadium Complex, Khopat, Thane" required>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Start Date *</label>
+                        <input type="date" id="tStartDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date *</label>
+                        <input type="date" id="tEndDate" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Format</label>
+                        <input type="text" id="tFormat" placeholder="e.g. 6v6 Knockout + League">
+                    </div>
+                    <div class="form-group">
+                        <label>Bracket Max Teams</label>
+                        <input type="number" id="tMaxTeams" value="32" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Entry Fee (₹)</label>
+                        <input type="number" id="tEntryFee" value="1200">
+                    </div>
+                    <div class="form-group">
+                        <label>Prize Pool (₹)</label>
+                        <input type="number" id="tPrizePool" value="20000">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Organizer Club / Name *</label>
+                        <input type="text" id="tOrganizerName" placeholder="e.g. Thane District Volleyball Association" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Number *</label>
+                        <input type="tel" id="tOrganizerContact" placeholder="+91 98765 43210" required>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSubmitHost" class="btn-action" style="width: 100%; margin-top: 10px;">
+                    Publish Tournament to MySQL
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast-box" id="toast"></div>
+
+    <script>
+        let hostedTournaments = [];
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.borderColor = isError ? 'var(--danger)' : 'var(--accent-cyan)';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3800);
+        }
+
+        function openHostModal() { document.getElementById('hostModal').style.display = 'flex'; }
+        function closeHostModal() { document.getElementById('hostModal').style.display = 'none'; document.getElementById('hostForm').reset(); }
+
+        // 1. Fetch Tournaments and their Registered Squads from MySQL
+        async function fetchHostedTournaments() {
+            try {
+                const res = await fetch('/api/organizer/tournaments-with-teams');
+                const data = await res.json();
+
+                if (data.success) {
+                    hostedTournaments = data.tournaments;
+                    renderTournaments(hostedTournaments);
+                } else {
+                    showToast(data.message || 'Error fetching tournaments', true);
+                }
+            } catch (err) {
+                showToast('Unable to connect to backend at http://localhost:3000', true);
+            }
+        }
+
+        // 2. Render Tournaments with registered squads
+        function renderTournaments(tournaments) {
+            const container = document.getElementById('tournamentsContainer');
+            container.innerHTML = '';
+
+            document.getElementById('tournamentCountText').innerText = 
+                `🏆 Total Tournaments: ${tournaments.length} | Showing registered squads`;
+
+            if (tournaments.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 4rem; background: var(--surface-card); border-radius: 16px; border: 1px dashed var(--border-glass);">
+                        <p style="color: var(--text-body); font-size: 1.1rem;">No tournaments hosted yet.</p>
+                        <p style="color: var(--accent-cyan); margin-top: 8px; cursor: pointer; font-weight: 700;" onclick="openHostModal()">Host your first tournament now!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            tournaments.forEach(t => {
+                const registeredCount = t.teams ? t.teams.length : 0;
+                const maxTeams = t.max_teams || 32;
+                const percentage = Math.min(100, Math.round((registeredCount / maxTeams) * 100));
+
+                const card = document.createElement('div');
+                card.className = 'tournament-card';
+
+                // Build teams table rows
+                let teamsRowsHtml = '';
+                if (registeredCount === 0) {
+                    teamsRowsHtml = `<tr><td colspan="5" style="text-align: center; color: var(--text-body); padding: 1.5rem;">No squads registered yet. Teams that register on home.html will appear here.</td></tr>`;
+                } else {
+                    t.teams.forEach(team => {
+                        teamsRowsHtml += `
+                            <tr>
+                                <td style="font-weight: 700; color: #fff;">${team.team_name}</td>
+                                <td>${team.captain_name}<br><small style="color: var(--text-body);">${team.captain_email}</small></td>
+                                <td><a href="https://wa.me/${team.captain_contact.replace(/[^0-9]/g, '')}" target="_blank" style="color: var(--accent-cyan); text-decoration: none;">💬 ${team.captain_contact}</a></td>
+                                <td><div class="roster-chip-box">${team.player_roster}</div></td>
+                                <td>${team.registered_at ? team.registered_at.split('T')[0] : 'Active'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                card.innerHTML = `
+                    <div class="tournament-header">
+                        <div>
+                            <span class="badge-sport">${t.sport}</span>
+                            <h2 class="tournament-title" style="margin-top: 6px;">${t.name}</h2>
+                            <p style="color: var(--text-body); font-size: 0.88rem;">📍 ${t.venue}, ${t.city} • Organized by: <strong style="color: #fff;">${t.organizer_name}</strong></p>
+                        </div>
+                        <button class="teams-toggle-btn" onclick="toggleTeamsSection(${t.id})">
+                            👥 View Registered Squads (${registeredCount}/${maxTeams}) ▾
+                        </button>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-item">🗓️ Dates: <strong>${t.start_date.split('T')[0]} to ${t.end_date.split('T')[0]}</strong></div>
+                        <div class="info-item">⚔️ Format: <strong>${t.format_type || 'Knockout'}</strong></div>
+                        <div class="info-item">🎟️ Entry Fee: <strong>₹${t.entry_fee}</strong></div>
+                        <div class="info-item">🏆 Prize Pool: <strong>₹${t.prize_pool}</strong></div>
+                    </div>
+
+                    <div class="progress-box">
+                        <div class="progress-labels">
+                            <span>Roster Bracket Fill</span>
+                            <span><strong>${registeredCount}</strong> / ${maxTeams} Slots Registered (${percentage}%)</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-fill" style="width: ${percentage}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Collapsible Registered Squads Drawer -->
+                    <div class="teams-section" id="teams-section-${t.id}">
+                        <h4 style="font-size: 1rem; color: #fff; margin-bottom: 0.5rem;">Registered Teams for this Tournament:</h4>
+                        <div style="overflow-x: auto;">
+                            <table class="teams-table">
+                                <thead>
+                                    <tr>
+                                        <th>Squad Name</th>
+                                        <th>Captain</th>
+                                        <th>Contact</th>
+                                        <th>Submitted Player Roster</th>
+                                        <th>Registration Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${teamsRowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Toggle Registered Teams Visibility
+        function toggleTeamsSection(tournamentId) {
+            const section = document.getElementById(`teams-section-${tournamentId}`);
+            if (section.style.display === 'block') {
+                section.style.display = 'none';
+            } else {
+                section.style.display = 'block';
+            }
+        }
+
+        // 3. Submit New Tournament to Backend & MySQL
+        async function submitHostTournament(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitHost');
+            btn.disabled = true;
+            btn.innerText = 'Publishing to MySQL...';
+
+            const payload = {
+                name: document.getElementById('tName').value.trim(),
+                sport: document.getElementById('tSport').value,
+                city: document.getElementById('tCity').value,
+                venue: document.getElementById('tVenue').value.trim(),
+                startDate: document.getElementById('tStartDate').value,
+                endDate: document.getElementById('tEndDate').value,
+                formatType: document.getElementById('tFormat').value.trim(),
+                maxTeams: document.getElementById('tMaxTeams').value,
+                entryFee: document.getElementById('tEntryFee').value,
+                prizePool: document.getElementById('tPrizePool').value,
+                organizerName: document.getElementById('tOrganizerName').value.trim(),
+                organizerContact: document.getElementById('tOrganizerContact').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/tournaments/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+
+                if (!res.ok || !result.success) {
+                    showToast(result.message || 'Failed to host tournament', true);
+                } else {
+                    showToast(result.message);
+                    closeHostModal();
+                    // Live re-fetch from database to display new tournament immediately
+                    await fetchHostedTournaments();
+                }
+            } catch (err) {
+                showToast('Failed to connect to backend server.', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Publish Tournament to MySQL';
+            }
+        }
+
+        // Initial Load on Page Launch
+        fetchHostedTournaments();
+    </script>
+</body>
+</html>

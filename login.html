@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account • Playsphere</title>
+    <style>
+        :root {
+            --bg-color: #05070b;
+            --card-bg: rgba(15, 23, 42, 0.75);
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* --- BACKGROUND ANIMATED ORBS --- */
+        .bg-animation {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: floatOrbs 12s infinite alternate ease-in-out;
+        }
+
+        .orb-1 {
+            width: 350px; height: 350px;
+            background: rgba(59, 130, 246, 0.4);
+            top: -10%; left: -10%;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 400px; height: 400px;
+            background: rgba(6, 182, 212, 0.35);
+            bottom: -15%; right: -10%;
+            animation-delay: -4s;
+        }
+
+        .orb-3 {
+            width: 300px; height: 300px;
+            background: rgba(147, 51, 234, 0.3);
+            top: 40%; left: 60%;
+            animation-delay: -8s;
+        }
+
+        @keyframes floatOrbs {
+            0% { transform: translateY(0px) translateX(0px) scale(1); }
+            50% { transform: translateY(40px) translateX(30px) scale(1.1); }
+            100% { transform: translateY(-40px) translateX(-30px) scale(0.95); }
+        }
+
+        header {
+            padding: 1.8rem 3rem;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.7rem;
+            font-weight: 800;
+            text-decoration: none;
+            background: linear-gradient(135deg, #60a5fa, var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+            animation: pulseLogo 3s infinite ease-in-out;
+        }
+
+        @keyframes pulseLogo {
+            0%, 100% { filter: drop-shadow(0 0 2px rgba(6, 182, 212, 0.3)); }
+            50% { filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.7)); }
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+            z-index: 10;
+        }
+
+        /* --- CARD ENTRY ANIMATION --- */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            padding: 2.8rem;
+            border-radius: 24px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 440px;
+            position: relative;
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(30px);
+            opacity: 0;
+        }
+
+        @keyframes cardEntrance {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .card h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        /* --- ALERT BANNERS --- */
+        .alert-box {
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-weight: 500;
+            animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--success-green);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: var(--danger-red);
+        }
+
+        .form-group {
+            margin-bottom: 1.35rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.55rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.95rem 1.1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: #fff;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.2), inset 0 0 10px rgba(6, 182, 212, 0.1);
+            background: rgba(255, 255, 255, 0.06);
+            transform: scale(1.01);
+        }
+
+        /* --- SHIMMER GLOW BUTTON --- */
+        button[type="submit"] {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1.2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        button[type="submit"]::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: rotate(30deg) translateX(-100%);
+            transition: transform 0.7s ease-in-out;
+        }
+
+        button[type="submit"]:hover::after {
+            transform: rotate(30deg) translateX(100%);
+        }
+
+        button[type="submit"]:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(6, 182, 212, 0.6);
+        }
+
+        button[type="submit"]:active {
+            transform: translateY(-1px);
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 1.8rem;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+
+        .footer-text span {
+            color: var(--accent-cyan);
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+
+        .footer-text span:hover {
+            color: #60a5fa;
+            text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+            text-decoration: underline;
+        }
+
+        /* --- VIEW TRANSITION ANIMATIONS --- */
+        .auth-form {
+            display: none;
+            opacity: 0;
+            transform: scale(0.97);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .auth-form.active {
+            display: block;
+            opacity: 1;
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Animated Background Orbs -->
+    <div class="bg-animation">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <header>
+        <a href="home.html" class="logo">⚡ PLAYSPHERE</a>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            
+            <!-- Alerts -->
+            <div id="successAlert" class="alert-box alert-success">Account created successfully! Please sign in below.</div>
+            <div id="errorAlert" class="alert-box alert-error"></div>
+
+            <!-- LOGIN VIEW -->
+            <div id="loginSection" class="auth-form active">
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Enter your credentials to access your account</p>
+                
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="loginEmail" placeholder="name@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit">Sign In ➔</button>
+                </form>
+
+                <div class="footer-text">
+                    New to Playsphere? <span onclick="switchView('signup')">Create an account</span>
+                </div>
+            </div>
+
+            <!-- SIGN UP VIEW -->
+            <div id="signupSection" class="auth-form">
+                <h2>Get Started</h2>
+                <p class="subtitle">Create your account to manage & join tournaments</p>
+                
+                <form id="signupForm" onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="signupName" placeholder="Om Ghanekar" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="signupEmail" placeholder="name@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signupPassword" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit">Create Account ➔</button>
+                </form>
+
+                <div class="footer-text">
+                    Already have an account? <span onclick="switchView('login')">Sign In</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function switchView(view) {
+            const loginSec = document.getElementById('loginSection');
+            const signupSec = document.getElementById('signupSection');
+
+            document.getElementById('successAlert').style.display = 'none';
+            document.getElementById('errorAlert').style.display = 'none';
+
+            if (view === 'signup') {
+                loginSec.classList.remove('active');
+                setTimeout(() => {
+                    signupSec.classList.add('active');
+                }, 50);
+            } else {
+                signupSec.classList.remove('active');
+                setTimeout(() => {
+                    loginSec.classList.add('active');
+                }, 50);
+            }
+        }
+
+        function showError(message) {
+            const errBox = document.getElementById('errorAlert');
+            errBox.innerText = message;
+            errBox.style.display = 'block';
+            document.getElementById('successAlert').style.display = 'none';
+        }
+
+        // 1. Backend Registration Integration
+        async function handleSignup(e) {
+            e.preventDefault();
+            
+            const fullname = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullname, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    document.getElementById('signupForm').reset();
+                    switchView('login');
+                    document.getElementById('successAlert').style.display = 'block';
+                    document.getElementById('loginEmail').value = email;
+                } else {
+                    showError(data.message || 'Registration failed.');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showError('Could not connect to the server.');
+            }
+        }
+
+        // 2. Backend Login Integration with Password Verification & Redirection
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Successful login: Redirect straight to home page
+                    window.location.href = 'home.html';
+                } else {
+                    // Wrong password or unknown user: Show error banner
+                    showError(data.message || 'Invalid email or password.');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                showError('Could not connect to the server.');
+            }
+        }
+    </script>
+</body>
+</html>
